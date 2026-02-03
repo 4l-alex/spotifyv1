@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Upload, Music, Image, FileText, Trash2, Edit2, Save } from 'lucide-react';
+import { Upload, Music, Image, FileText, Trash2, Edit2, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -130,7 +130,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const parseLyrics = (text: string): LyricLine[] => {
     const lines = text.split('\n').filter((line) => line.trim());
     return lines.map((line) => {
-      // Format: [mm:ss.ms] text OR [ss] text
       const match = line.match(/\[(\d+):?(\d+)?\.?(\d+)?\]\s*(.*)/);
       if (match) {
         const minutes = parseInt(match[1]) || 0;
@@ -155,7 +154,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       let coverUrl = editingSong?.cover_url || '';
       let duration: number | null = editingSong?.duration || null;
 
-      // Upload audio
+      // Upload audio/video
       if (audioFile) {
         const audioPath = `${Date.now()}-${audioFile.name}`;
         const { error: audioError } = await supabase.storage
@@ -170,7 +169,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
         audioUrl = audioData.publicUrl;
 
-        // Get duration from preview
         if (audioPreviewRef.current) {
           duration = Math.floor(audioPreviewRef.current.duration) || null;
         }
@@ -195,7 +193,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       const lyricsData = lyricsText.trim() ? parseLyrics(lyricsText) : null;
 
       if (editingSong) {
-        // Update existing
         const { error } = await supabase
           .from('songs')
           .update({
@@ -212,9 +209,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         if (error) throw error;
         toast.success('Canzone aggiornata!');
       } else {
-        // Insert new
         if (!audioUrl) {
-          toast.error('File audio obbligatorio per nuove canzoni');
+          toast.error('File audio/video obbligatorio per nuove canzoni');
           setIsUploading(false);
           return;
         }
@@ -327,15 +323,15 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
               onChange={(e) => setArtist(e.target.value)}
             />
 
-            {/* Audio Upload */}
+            {/* Audio/Video Upload */}
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
-                <Music className="w-4 h-4" /> File Audio
+                <Music className="w-4 h-4" /> File Audio/Video
               </label>
               <input
                 ref={audioInputRef}
                 type="file"
-                accept="audio/*"
+                accept="audio/*,video/mp4,video/*"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -348,7 +344,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 onClick={() => audioInputRef.current?.click()}
               >
                 <Upload className="w-4 h-4 mr-2" />
-                {audioFile ? audioFile.name : editingSong?.audio_url ? 'Sostituisci audio' : 'Carica audio'}
+                {audioFile ? audioFile.name : editingSong?.audio_url ? 'Sostituisci file' : 'Carica audio/video'}
               </Button>
               {audioFile && (
                 <audio
