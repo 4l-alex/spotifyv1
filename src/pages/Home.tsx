@@ -39,9 +39,9 @@ export default function Home() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Buongiorno!';
-    if (hour < 18) return 'Buon pomeriggio!';
-    return 'Buonasera!';
+    if (hour < 12) return 'Buongiorno';
+    if (hour < 18) return 'Buon pomeriggio';
+    return 'Buonasera';
   };
 
   if (isLoading) {
@@ -61,12 +61,12 @@ export default function Home() {
     <div className="p-4 pb-32 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full overflow-hidden">
+        <div className="w-12 h-12 rounded-full overflow-hidden glow-primary">
           <img src={logo} alt="Logo" className="w-full h-full object-cover" />
         </div>
         <div>
           <h1 className="text-2xl font-bold">
-            {getGreeting()}
+            {getGreeting()}! 👋
           </h1>
           <p className="text-muted-foreground">
             Cosa vuoi ascoltare oggi?
@@ -91,7 +91,9 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center py-12 text-muted-foreground">
+            <span className="text-6xl block mb-4">🎵</span>
             <p>Nessuna canzone disponibile</p>
+            <p className="text-sm mt-1">Aggiungi canzoni dal Pannello Admin</p>
           </div>
         )}
       </section>

@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Settings, ChevronDown, ChevronUp, Check } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { Moon, Sun, Settings } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Switch } from '@/components/ui/switch';
 import logo from '@/assets/logo.jpg';
 
 interface ProfileProps {
@@ -15,8 +11,8 @@ interface ProfileProps {
 }
 
 export default function Profile({ onOpenAdmin }: ProfileProps) {
-  const { language, setLanguage, t, languageNames, availableLanguages } = useLanguage();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
   const [stats, setStats] = useState({ songsCount: 0, totalSize: 0 });
 
   useEffect(() => {
@@ -51,13 +47,13 @@ export default function Profile({ onOpenAdmin }: ProfileProps) {
   return (
     <div className="p-4 pb-32 space-y-6">
       {/* Header */}
-      <h1 className="text-2xl font-bold">{t.profile}</h1>
+      <h1 className="text-2xl font-bold">Profilo</h1>
 
       {/* Profile Card */}
       <div className="bg-muted/30 rounded-2xl p-6">
         <div className="flex items-center gap-4">
           {/* Logo */}
-          <div className="w-20 h-20 rounded-full overflow-hidden">
+          <div className="w-20 h-20 rounded-full overflow-hidden glow-primary">
             <img
               src={logo}
               alt="Logo"
@@ -67,72 +63,56 @@ export default function Profile({ onOpenAdmin }: ProfileProps) {
 
           {/* Info */}
           <div className="flex-1">
-            <h2 className="text-xl font-bold">
-              Spotify <span className="line-through text-muted-foreground">ads</span>
-            </h2>
-            <p className="text-sm text-muted-foreground">{t.yourMusic}</p>
+            <h2 className="text-xl font-bold">MusicApp</h2>
+            <p className="text-sm text-muted-foreground">La tua musica, ovunque</p>
           </div>
         </div>
       </div>
 
-      {/* Settings Collapsible */}
-      <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center justify-between bg-muted/30 rounded-xl p-4 hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-3">
-              <Settings className="w-5 h-5 text-primary" />
-              <span className="font-semibold">{t.settings}</span>
-            </div>
-            {settingsOpen ? (
-              <ChevronUp className="w-5 h-5 text-muted-foreground" />
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-muted/30 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold text-primary">{stats.songsCount}</p>
+          <p className="text-xs text-muted-foreground">Brani</p>
+        </div>
+        <div className="bg-muted/30 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold text-primary">
+            {formatBytes(stats.totalSize)}
+          </p>
+          <p className="text-xs text-muted-foreground">Spazio</p>
+        </div>
+      </div>
+
+      {/* Settings */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">Impostazioni</h3>
+
+        {/* Theme Toggle */}
+        <div className="flex items-center justify-between bg-muted/30 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            {theme === 'dark' ? (
+              <Moon className="w-5 h-5 text-primary" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              <Sun className="w-5 h-5 text-primary" />
             )}
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-2 space-y-3">
-          {/* Stats */}
-          <div className="bg-muted/20 rounded-xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">{t.songs}</span>
-              <span className="font-semibold text-primary">{stats.songsCount}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">{t.space}</span>
-              <span className="font-semibold text-primary">{formatBytes(stats.totalSize)}</span>
-            </div>
+            <span>Tema {theme === 'dark' ? 'Scuro' : 'Chiaro'}</span>
           </div>
+          <Switch
+            checked={theme === 'light'}
+            onCheckedChange={toggleTheme}
+          />
+        </div>
 
-          {/* Language Selector */}
-          <div className="bg-muted/20 rounded-xl p-4">
-            <p className="text-muted-foreground mb-3">{t.language}</p>
-            <div className="space-y-2">
-              {availableLanguages.map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => setLanguage(lang)}
-                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <span className={language === lang ? 'text-primary font-medium' : ''}>
-                    {languageNames[lang]}
-                  </span>
-                  {language === lang && <Check className="w-5 h-5 text-primary" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Admin Button */}
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={onOpenAdmin}
-      >
-        <Settings className="w-4 h-4 mr-2" />
-        {t.adminPanel}
-      </Button>
+        {/* Admin Button */}
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={onOpenAdmin}
+        >
+          <Settings className="w-4 h-4 mr-2" />
+          Pannello Admin
+        </Button>
+      </div>
     </div>
   );
 }
