@@ -47,15 +47,9 @@ export default defineConfig(({ mode }) => ({
         ],
       },
     }),
-    // ← qui puoi aggiungere dopo componentTagger() o altri plugin se li usi
-    // componentTagger(),   // ← decommenta se lo vuoi attivare
+    // componentTagger(),   ← se lo vuoi usare, metti la virgola sopra e decommenta
   ],
 
-  // resolve: {
-  //   alias: {
-  //     "@": path.resolve(__dirname, "./src"),
-  //   },
-  // },
+  // resolve: { alias: { "@": path.resolve(__dirname, "./src") } },   ← opzionale
 
-  // altre configurazioni se servono...
 }));
