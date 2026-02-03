@@ -13,20 +13,17 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+
   plugins: [
     react(),
-
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
       filename: "manifest.webmanifest",
-
       devOptions: {
         enabled: true,
       },
-
       includeAssets: ["favicon.ico"],
-
       manifest: {
         name: "Spotify",
         short_name: "Spotify",
@@ -50,14 +47,15 @@ export default defineConfig(({ mode }) => ({
         ],
       },
     }),
+    // ← qui puoi aggiungere dopo componentTagger() o altri plugin se li usi
+    // componentTagger(),   // ← decommenta se lo vuoi attivare
+  ],
 
-    // aggiungi il componentTagger solo in sviluppo
-    mode === "development" && componentTagger(),
-  ].filter(Boolean),
+  // resolve: {
+  //   alias: {
+  //     "@": path.resolve(__dirname, "./src"),
+  //   },
+  // },
 
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
+  // altre configurazioni se servono...
 }));
