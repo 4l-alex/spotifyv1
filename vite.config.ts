@@ -16,39 +16,37 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
 
-    VitePWA({
-      registerType: "autoUpdate",
-      includeAssets: ["favicon.ico"],
-      manifest: {
-        name: "Spotify",
-        short_name: "Spotify",
-        description: "Spotify clone",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#000000",
-        theme_color: "#1DB954",
-        icons: [
-          {
-            src: "/pwa-192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "/pwa-512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-        ],
-      },
-    }),
+VitePWA({
+  registerType: "autoUpdate",
+  injectRegister: "auto",
+  filename: "manifest.webmanifest",
 
-    mode === "development" && componentTagger(),
-  ].filter(Boolean),
-
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+  devOptions: {
+    enabled: true,
   },
-}));
 
+  includeAssets: ["favicon.ico"],
+
+  manifest: {
+    name: "Spotify",
+    short_name: "Spotify",
+    description: "Spotify clone",
+    start_url: "/",
+    scope: "/",
+    display: "standalone",
+    background_color: "#000000",
+    theme_color: "#1DB954",
+    icons: [
+      {
+        src: "/pwa-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        src: "/pwa-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+  },
+}),
