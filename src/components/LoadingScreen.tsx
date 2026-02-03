@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import logo from '@/assets/logo.jpg';
 
 export default function LoadingScreen() {
   const [dots, setDots] = useState('');
@@ -19,7 +18,7 @@ export default function LoadingScreen() {
         {Array.from({ length: 50 }).map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-primary rounded-full animate-twinkle"
+            className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -32,8 +31,8 @@ export default function LoadingScreen() {
 
       {/* Logo */}
       <div className="relative z-10 flex flex-col items-center gap-6">
-        <div className="w-28 h-28 rounded-full overflow-hidden glow-primary animate-pulse">
-          <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-primary animate-pulse">
+          <span className="text-5xl">🎵</span>
         </div>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-glow">MusicApp</h1>

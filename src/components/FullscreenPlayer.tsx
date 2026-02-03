@@ -11,10 +11,16 @@ import {
   Heart,
 } from 'lucide-react';
 import { usePlayer } from '@/contexts/PlayerContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 
-export default function FullscreenPlayer() {
+interface FullscreenPlayerProps {
+  onSecretGesture?: () => void;
+}
+
+export default function FullscreenPlayer({ onSecretGesture }: FullscreenPlayerProps) {
   const {
     currentSong,
     isPlaying,
@@ -32,10 +38,35 @@ export default function FullscreenPlayer() {
     toggleRepeat,
     setFullscreen,
   } = usePlayer();
+  const { user } = useAuth();
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
   const lyricsRef = useRef<HTMLDivElement>(null);
+
+  // Secret gesture state
+  const [tapCount, setTapCount] = useState(0);
+  const [lastTapTime, setLastTapTime] = useState(0);
+  const [waitingForLongPress, setWaitingForLongPress] = useState(false);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check favorite status
+  useEffect(() => {
+    if (!user || !currentSong) return;
+
+    const checkFavorite = async () => {
+      const { data } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('song_id', currentSong.id)
+        .maybeSingle();
+
+      setIsFavorite(!!data);
+    };
+
+    checkFavorite();
+  }, [user, currentSong?.id]);
 
   // Auto-scroll lyrics
   useEffect(() => {
@@ -49,8 +80,68 @@ export default function FullscreenPlayer() {
     }
   }, [currentLyricIndex]);
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  // Handle secret gesture - 7 taps
+  const handleCoverTap = () => {
+    const now = Date.now();
+
+    if (now - lastTapTime > 1000) {
+      // Reset if too slow
+      setTapCount(1);
+    } else {
+      setTapCount((prev) => prev + 1);
+    }
+
+    setLastTapTime(now);
+
+    if (tapCount + 1 >= 7) {
+      setWaitingForLongPress(true);
+      setTapCount(0);
+
+      // Auto-reset after 5 seconds
+      setTimeout(() => {
+        setWaitingForLongPress(false);
+      }, 5000);
+    }
+  };
+
+  // Handle long press for secret gesture
+  const handleCoverMouseDown = () => {
+    if (!waitingForLongPress) return;
+
+    longPressTimerRef.current = setTimeout(() => {
+      if ('vibrate' in navigator) {
+        navigator.vibrate([50, 50, 50]);
+      }
+      setWaitingForLongPress(false);
+      onSecretGesture?.();
+    }, 3000);
+  };
+
+  const handleCoverMouseUp = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (!user || !currentSong) return;
+
+    if (isFavorite) {
+      await supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('song_id', currentSong.id);
+      setIsFavorite(false);
+    } else {
+      await supabase.from('favorites').insert({
+        user_id: user.id,
+        song_id: currentSong.id,
+      });
+      setIsFavorite(true);
+    }
+
     if ('vibrate' in navigator) {
       navigator.vibrate(10);
     }
@@ -79,7 +170,7 @@ export default function FullscreenPlayer() {
           onClick={toggleFavorite}
           className={cn(
             "w-10 h-10 flex items-center justify-center transition-colors",
-            isFavorite ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            isFavorite ? "text-red-500" : "text-muted-foreground hover:text-foreground"
           )}
         >
           <Heart className={cn("w-6 h-6", isFavorite && "fill-current")} />
@@ -109,7 +200,14 @@ export default function FullscreenPlayer() {
             ))}
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center">
+          <div
+            className="h-full flex items-center justify-center"
+            onClick={handleCoverTap}
+            onMouseDown={handleCoverMouseDown}
+            onMouseUp={handleCoverMouseUp}
+            onTouchStart={handleCoverMouseDown}
+            onTouchEnd={handleCoverMouseUp}
+          >
             <div
               className={cn(
                 "w-full max-w-xs aspect-square rounded-2xl overflow-hidden shadow-2xl transition-all duration-500",
