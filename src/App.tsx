@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PlayerProvider } from '@/contexts/PlayerContext';
-import { ThemeProvider } from '@/contexts/ThemeContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import StarryBackground from '@/components/StarryBackground';
 import BottomNavigation from '@/components/BottomNavigation';
 import MiniPlayer from '@/components/MiniPlayer';
@@ -49,7 +49,7 @@ function AppRoutes() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
+    <LanguageProvider>
       <PlayerProvider>
         <TooltipProvider>
           <Toaster />
@@ -59,7 +59,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </PlayerProvider>
-    </ThemeProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

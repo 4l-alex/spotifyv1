@@ -75,7 +75,7 @@ export default function SongCard({ song, index, showIndex, onPlay }: SongCardPro
                 />
               ) : (
                 <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <span className="text-xl">🎵</span>
+                  <Play className="w-5 h-5 text-muted-foreground" />
                 </div>
               )}
             </div>

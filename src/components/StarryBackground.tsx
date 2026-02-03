@@ -83,7 +83,7 @@ const StarryBackground = memo(() => {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ background: 'linear-gradient(to bottom, hsl(240 10% 3.9%), hsl(240 15% 8%))' }}
+      style={{ background: 'hsl(0 0% 0%)' }}
     />
   );
 });
