@@ -1,6 +1,4 @@
 import { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './AuthContext';
 
 interface Song {
   id: string;
@@ -44,7 +42,6 @@ interface PlayerContextType {
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
@@ -116,24 +113,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setCurrentLyricIndex(index);
   }, [currentTime, currentSong?.lyrics]);
 
-  // Log listening history
-  const logListening = useCallback(async (songId: string, durationListened: number) => {
-    if (!user) return;
-
-    await supabase.from('listening_history').insert({
-      user_id: user.id,
-      song_id: songId,
-      duration_listened: Math.floor(durationListened),
-    });
-  }, [user]);
-
   const playSong = useCallback((song: Song) => {
     if (!audioRef.current) return;
-
-    // Log previous song listening
-    if (currentSong && currentTime > 5) {
-      logListening(currentSong.id, currentTime);
-    }
 
     setCurrentSong(song);
     setQueue([song]);
@@ -146,7 +127,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         navigator.vibrate(5);
       }
     }).catch(console.error);
-  }, [currentSong, currentTime, logListening]);
+  }, []);
 
   const playQueue = useCallback((songs: Song[], startIndex = 0) => {
     if (!audioRef.current || songs.length === 0) return;
@@ -186,11 +167,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const nextSong = useCallback(() => {
     if (queue.length === 0) return;
 
-    // Log current song listening
-    if (currentSong && currentTime > 5) {
-      logListening(currentSong.id, currentTime);
-    }
-
     let nextIndex = currentIndex + 1;
 
     if (nextIndex >= queue.length) {
@@ -216,7 +192,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if ('vibrate' in navigator) {
       navigator.vibrate(5);
     }
-  }, [queue, currentIndex, repeatMode, currentSong, currentTime, logListening]);
+  }, [queue, currentIndex, repeatMode]);
 
   const previousSong = useCallback(() => {
     if (!audioRef.current) return;
